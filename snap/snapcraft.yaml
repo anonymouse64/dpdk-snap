@@ -8,7 +8,13 @@ icon: DPDK_logo_vertical_rev_small.png
 architectures: [amd64]
 
 parts:
+  patches:
+    plugin: dump
+    stage: ["*.patch"]
+    source: patches
+    prime: ["-*"]
   dpdk:
+    after: [patches]
     plugin: python
     python-version: python2
     source: git://dpdk.org/dpdk
@@ -24,6 +30,7 @@ parts:
       - libnuma1
       - pciutils
     override-build: |
+      git apply --ignore-space-change --ignore-whitespace $SNAPCRAFT_STAGE/var-run-dpdk-env-var.patch
       snapcraftctl build
       make install T=x86_64-native-linuxapp-gcc DESTDIR=$SNAPCRAFT_PART_INSTALL/dpdk RTE_KERNELDIR=/usr/src/linux-headers-4.4.0-140-generic # RTE_KERNELDIR is only needed if kernel version is not the same as installed on build host.
 
@@ -36,8 +43,8 @@ apps:
       - network-control
       - network-observe
       - hardware-observe
-      - hugepages-observe # commented out until hugepages interface is in snapd
-      - hugepages-control # commented out until hugepages interface is in snapd
+#      - hugepages-observe # commented out until hugepages interface is in snapd
+#      - hugepages-control # commented out until hugepages interface is in snapd
       - process-control
       - system-observe
       
